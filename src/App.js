@@ -1,46 +1,47 @@
-import React from "react";
-import axios from "axios";
+import React, {useState,useEffect} from "react";
 import "./App.css";
-import { useEffect, useState } from "react";
-import ApodContainer from "./components/ApodContainer";
+import axios from 'axios';
+import Nasa from './Nasa';
+
 
 function App() {
-  const [apodData, setApodData] = useState();
-  const [datePicker, setDatePicker] = useState(
-    new Date("2022-03-30").toISOString().slice(0, 10)
-  );
+  const[veri,setVeri] = useState();
+  const[arama, setArama] = useState("2023-08-08");
+
+  const aramaHandler = (event) => {
+    setArama(event.target.value)
+  }
 
   useEffect(() => {
-    // Optionally the request above could also be done as
-    axios
-      .get("https://api.nasa.gov/planetary/apod", {
-        params: {
-          api_key: "DEMO_KEY",
-          date: datePicker,
-        },
-      })
-      .then(function (response) {
-        console.log(response);
-        setApodData(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-      .finally(function () {
-        // always executed
-      });
-    console.log("sayfam render oldu");
-  }, [datePicker]);
+    const url = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date="+arama;
+    setVeri(null);
+    axios.get(url)
+    .then(response => {
+      setVeri(response.data)
+    }).catch(err => {
+      console.log("error", err);
+    })
+
+  }, [arama])
+  
+
+  /*
+  useEffect(() => {
+
+  }) //herhangi bir state güncellendiğinde çalışır
+
+  useEffect(() => {
+
+  }, [veri, arama]) //sadece veri ve arama state'leri güncellendiğinde çalışır
+
+  useEffect(() => {
+
+  }, []) */ //sayfa yüklendiğinde bir kere çalışır
 
   return (
     <div className="App">
-      <ApodContainer
-        data={apodData}
-        dateChange={setDatePicker}
-        currentDate={datePicker}
-      />
+      { veri ? <Nasa arama={arama} aramaHandler = {aramaHandler} veri= {veri}/> : <h2>Yükleniyor...</h2>}
     </div>
-  );
-}
+  )};
 
 export default App;
